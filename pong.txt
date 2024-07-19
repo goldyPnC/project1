@@ -1,0 +1,197 @@
+#include <iostream>
+#include <raylib.h>
+
+using namespace std;
+
+int score_left = 0;
+int score_right = 0;
+
+class Paddle
+{
+    public:
+    float x,y;
+    float width,height;
+    int speed;
+
+    void Draw()
+    {
+        DrawRectangle(x,y,width,height,WHITE);
+    }
+    
+    void Update_Right()
+    {
+        if(IsKeyDown(KEY_UP))
+        {
+            y = y - speed;
+        }
+
+        if(IsKeyDown(KEY_DOWN))
+        {
+            y =y + speed;
+        }
+
+        if(y <= 0)
+        {
+            y = 0;
+        }
+
+        if(y + height  >= GetScreenHeight())
+        {
+            y = GetScreenHeight() - height;
+        }
+
+
+    }
+
+    void Update_Left()
+    {
+         if(IsKeyDown(KEY_W))
+        {
+            y = y - speed;
+        }
+
+        if(IsKeyDown(KEY_S))
+        {
+            y =y + speed;
+        }
+
+        if(y <= 0)
+        {
+            y = 0;
+        }
+
+        if(y + height  >= GetScreenHeight())
+        {
+            y = GetScreenHeight() - height;
+        }
+
+
+    }
+
+
+
+};
+
+
+
+   
+class Ball
+{
+    public:
+    float x,y;
+    int speed_x,speed_y;
+    int radius;
+
+    void Draw()
+    {
+        DrawCircle(x,y,radius,WHITE); 
+
+    }
+
+    void Update()
+    {
+        x=x+speed_x;
+        y=y+speed_y;
+
+        if(y + radius >= GetScreenHeight() || y - radius <= 0)
+        {
+            speed_y=speed_y * -1;
+        }
+
+        if(x + radius >= GetScreenWidth())
+        {
+            score_left++;
+            speed_x= speed_x * -1;
+        }
+        if(x - radius <= 0)
+        {
+            score_right++;
+            speed_x= speed_x * -1;
+
+        }
+
+
+    }
+
+
+
+};
+
+
+Ball ball;
+Paddle paddle_right;
+Paddle paddle_left;
+
+int main ()
+{
+    
+    cout <<"Staring the game" <<endl;
+    
+    const int screen_width = 1280;
+    const int screen_height = 800;
+    InitWindow(screen_width,screen_height,"My Pong Game");
+    SetTargetFPS(60);
+
+    //ball details
+    ball.radius=20;
+    ball.x=screen_width/2;
+    ball.y=screen_height/2;
+    ball.speed_x=7;
+    ball.speed_y=7;
+
+    //Right paddle details
+
+    paddle_right.width = 25;
+    paddle_right.height = 120;
+    paddle_right.x = screen_width - 10 -paddle_right.width;
+    paddle_right.y = (screen_height/2) - (paddle_right.height/2);
+    paddle_right.speed = 6;
+
+    //Left paddle details
+    paddle_left.width = 25;
+    paddle_left.height = 120;
+    paddle_left.speed = 6;
+    paddle_left.x = 10;
+    paddle_left.y = (screen_height/2) -(paddle_left.height/2);
+
+    while(WindowShouldClose() == false)
+    {
+        BeginDrawing();
+      
+        ball.Draw();
+        ball.Update();
+        ClearBackground(BLACK);
+
+        if (CheckCollisionCircleRec(Vector2{ball.x,ball.y},ball.radius,Rectangle{paddle_left.x,paddle_left.y,paddle_left.width,paddle_left.height}))
+        {
+            ball.speed_x= ball.speed_x * -1;
+        }
+        
+        if (CheckCollisionCircleRec(Vector2{ball.x,ball.y},ball.radius,Rectangle{paddle_right.x,paddle_right.y,paddle_right.width,paddle_right.height}))
+        {
+            ball.speed_x= ball.speed_x * -1;
+        }
+
+        paddle_right.Draw();
+        paddle_right.Update_Right();
+        paddle_left.Draw();
+        paddle_left.Update_Left();
+        DrawLine(screen_width/2,0,screen_width/2,screen_height,WHITE);
+        
+        DrawText(TextFormat("%i",score_left),screen_width/4-20,20,80,WHITE);
+         DrawText(TextFormat("%i",score_right),screen_width*3 /4-20,20,80,WHITE);
+
+
+
+        EndDrawing();
+    }
+
+
+
+
+    CloseWindow();
+
+    
+   
+    return 0;
+}
